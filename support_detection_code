@@ -1,0 +1,33 @@
+// My code 
+//@version=6 
+indicator("Support Detection", overlay=true)
+
+// User Parameters
+length = input.int(20, title="Period")
+deviation = input.float(1.5, title="Deviation in %")
+
+// Detecting Local Lows
+lowestLow = ta.lowest(low, length)
+lowestCondition = low == lowestLow
+
+// List of Supports
+var float[] supports = array.new_float()
+var float lastSupport = na
+
+if lowestCondition
+    newSupport = low
+    found = false
+    for i = 0 to array.size(supports) - 1
+        existingSupport = array.get(supports, i)
+        if math.abs(existingSupport - newSupport) / existingSupport < deviation / 100
+            found := true
+            break
+    if not found
+        array.push(supports, newSupport)
+        lastSupport := newSupport
+
+// Displaying Supports
+for i = 0 to array.size(supports) - 1
+    line.new(x1=bar_index - length, y1=array.get(supports, i), x2=bar_index, y2=array.get(supports, i), width=2, color=color.green, extend=extend.right)
+
+plot(lastSupport, style=plot.style_cross, color=color.green, title="Last Support")
